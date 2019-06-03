@@ -22,7 +22,8 @@ var _ = Describe("Appointment Routes", func() {
 			}
 		`)
 
-		req, _ := http.NewRequest("POST", "http://localhost:8080/schedules", bytes.NewReader(reqBody))
+		url := fmt.Sprintf("%v/schedules", acceptanceUrl)
+		req, _ := http.NewRequest("POST", url, bytes.NewReader(reqBody))
 
 		client := http.Client{}
 
@@ -31,7 +32,7 @@ var _ = Describe("Appointment Routes", func() {
 			Fail("Failed to send request")
 		}
 
-		var s scheduler.Schedule
+		var s scheduler.ScheduleResponse
 		err = json.NewDecoder(res.Body).Decode(&s)
 		if err != nil {
 			Fail("Failed to decode response body")
@@ -53,7 +54,7 @@ var _ = Describe("Appointment Routes", func() {
 				}
 			`)
 
-			url := fmt.Sprintf("http://localhost:8080/schedules/%v/appointments", scheduleID)
+			url := fmt.Sprintf("%v/schedules/%v/appointments", acceptanceUrl, scheduleID)
 			req, _ := http.NewRequest("POST", url, bytes.NewReader(reqBody))
 
 			client := http.Client{}
@@ -107,7 +108,7 @@ var _ = Describe("Appointment Routes", func() {
 					}
 				`)
 
-			url := fmt.Sprintf("http://localhost:8080/schedules/%v/appointments", -1)
+			url := fmt.Sprintf("%v/schedules/-1/appointments", acceptanceUrl)
 			req, _ := http.NewRequest("POST", url, bytes.NewReader(reqBody))
 
 			client := http.Client{}
@@ -127,7 +128,7 @@ var _ = Describe("Appointment Routes", func() {
 					}
 				`)
 
-			url := fmt.Sprintf("http://localhost:8080/schedules/%v/appointments", scheduleID)
+			url := fmt.Sprintf("%v/schedules/%v/appointments", acceptanceUrl, scheduleID)
 			req, _ := http.NewRequest("POST", url, bytes.NewReader(reqBody))
 
 			client := http.Client{}
@@ -149,7 +150,7 @@ var _ = Describe("Appointment Routes", func() {
 					}
 				`)
 
-				url := fmt.Sprintf("http://localhost:8080/schedules/%v/appointments", scheduleID)
+				url := fmt.Sprintf("%v/schedules/%v/appointments", acceptanceUrl, scheduleID)
 				req, _ := http.NewRequest("POST", url, bytes.NewReader(reqBody))
 
 				client := http.Client{}
@@ -170,7 +171,7 @@ var _ = Describe("Appointment Routes", func() {
 					}
 				`)
 
-				url := fmt.Sprintf("http://localhost:8080/schedules/%v/appointments", scheduleID)
+				url := fmt.Sprintf("%v/schedules/%v/appointments", acceptanceUrl, scheduleID)
 				req, _ := http.NewRequest("POST", url, bytes.NewReader(reqBody))
 
 				client := http.Client{}
@@ -191,7 +192,7 @@ var _ = Describe("Appointment Routes", func() {
 					}
 				`)
 
-				url := fmt.Sprintf("http://localhost:8080/schedules/%v/appointments", scheduleID)
+				url := fmt.Sprintf("%v/schedules/%v/appointments", acceptanceUrl, scheduleID)
 				req, _ := http.NewRequest("POST", url, bytes.NewReader(reqBody))
 
 				client := http.Client{}
@@ -232,7 +233,7 @@ var _ = Describe("Appointment Routes", func() {
 				}
 			`)
 
-			url := fmt.Sprintf("http://localhost:8080/schedules/%v/appointments", scheduleID)
+			url := fmt.Sprintf("%v/schedules/%v/appointments", acceptanceUrl, scheduleID)
 			req, _ := http.NewRequest("POST", url, bytes.NewReader(reqBody))
 
 			client := http.Client{}
@@ -251,7 +252,7 @@ var _ = Describe("Appointment Routes", func() {
 			Expect(res.StatusCode).To(Equal(http.StatusCreated))
 
 			// Find the appointment that was just created
-			url = fmt.Sprintf("http://localhost:8080/schedules/%v/appointments/%v", scheduleID, createdAppointment.ID)
+			url = fmt.Sprintf("%v/schedules/%v/appointments/%v", acceptanceUrl, scheduleID, createdAppointment.ID)
 			req, _ = http.NewRequest("GET", url, nil)
 
 			res, err = client.Do(req)
@@ -270,7 +271,8 @@ var _ = Describe("Appointment Routes", func() {
 		})
 
 		It("Should return a bad request for a non-numeric scheduleID or appointmentID", func() {
-			req, _ := http.NewRequest("GET", "http://localhost:8080/schedules/blamo/appointments/1", nil)
+			url := fmt.Sprintf("%v/schedules/blamo/appointments/1", acceptanceUrl)
+			req, _ := http.NewRequest("GET", url, nil)
 
 			client := http.Client{}
 
@@ -281,7 +283,8 @@ var _ = Describe("Appointment Routes", func() {
 
 			Expect(res.StatusCode).To(Equal(http.StatusBadRequest))
 
-			req, _ = http.NewRequest("GET", "http://localhost:8080/schedules/1/appointments/blamo", nil)
+			url = fmt.Sprintf("%v/schedules/1/appointments/blamo", acceptanceUrl)
+			req, _ = http.NewRequest("GET", url, nil)
 			res, err = client.Do(req)
 			if err != nil {
 				Fail("Failed to send request")
@@ -291,7 +294,8 @@ var _ = Describe("Appointment Routes", func() {
 		})
 
 		It("Should return a not found for a not found scheduleID", func() {
-			req, _ := http.NewRequest("GET", "http://localhost:8080/schedules/-1/appointments/48", nil)
+			url := fmt.Sprintf("%v/schedules/-1/appointments/1", acceptanceUrl)
+			req, _ := http.NewRequest("GET", url, nil)
 
 			client := http.Client{}
 
@@ -304,7 +308,7 @@ var _ = Describe("Appointment Routes", func() {
 		})
 
 		It("Should return a not found for a not found appointmentID", func() {
-			url := fmt.Sprintf("http://localhost:8080/schedules/%v/appointments/-1", scheduleID)
+			url := fmt.Sprintf("%v/schedules/%v/appointments/-1", acceptanceUrl, scheduleID)
 			req, _ := http.NewRequest("GET", url, nil)
 
 			client := http.Client{}
@@ -328,7 +332,7 @@ var _ = Describe("Appointment Routes", func() {
 				}
 			`)
 
-			url := fmt.Sprintf("http://localhost:8080/schedules/%v/appointments", scheduleID)
+			url := fmt.Sprintf("%v/schedules/%v/appointments", acceptanceUrl, scheduleID)
 			req, _ := http.NewRequest("POST", url, bytes.NewReader(reqBody))
 
 			client := http.Client{}
@@ -347,7 +351,7 @@ var _ = Describe("Appointment Routes", func() {
 			Expect(res.StatusCode).To(Equal(http.StatusCreated))
 
 			// Delete the appointment that was just created
-			url = fmt.Sprintf("http://localhost:8080/schedules/%v/appointments/%v", scheduleID, createdAppointment.ID)
+			url = fmt.Sprintf("%v/schedules/%v/appointments/%v", acceptanceUrl, scheduleID, createdAppointment.ID)
 			req, _ = http.NewRequest("DELETE", url, nil)
 
 			res, err = client.Do(req)
@@ -365,7 +369,7 @@ var _ = Describe("Appointment Routes", func() {
 			Expect(deletedAppointment).To(Equal(createdAppointment))
 
 			// Confirm that appt is deleted
-			url = fmt.Sprintf("http://localhost:8080/schedules/%v/appointments/%v", scheduleID, createdAppointment.ID)
+			url = fmt.Sprintf("%v/schedules/%v/appointments/%v", acceptanceUrl, scheduleID, createdAppointment.ID)
 			req, _ = http.NewRequest("GET", url, nil)
 
 			res, err = client.Do(req)
@@ -376,7 +380,8 @@ var _ = Describe("Appointment Routes", func() {
 		})
 
 		It("Should return a bad request for a non-numeric scheduleID or appointmentID", func() {
-			req, _ := http.NewRequest("DELETE", "http://localhost:8080/schedules/blamo/appointments/2", nil)
+			url := fmt.Sprintf("%v/schedules/blamo/appointments/2", acceptanceUrl)
+			req, _ := http.NewRequest("DELETE", url, nil)
 
 			client := http.Client{}
 
@@ -387,7 +392,8 @@ var _ = Describe("Appointment Routes", func() {
 
 			Expect(res.StatusCode).To(Equal(http.StatusBadRequest))
 
-			req, _ = http.NewRequest("DELETE", "http://localhost:8080/schedules/2/appointments/blamo", nil)
+			url = fmt.Sprintf("%v/schedules/2/appointments/blamo", acceptanceUrl)
+			req, _ = http.NewRequest("DELETE", url, nil)
 			res, err = client.Do(req)
 			if err != nil {
 				Fail("Failed to send request")
@@ -397,7 +403,8 @@ var _ = Describe("Appointment Routes", func() {
 		})
 
 		It("Should return a not found for a not found scheduleID", func() {
-			req, _ := http.NewRequest("DELETE", "http://localhost:8080/schedules/-1/appointments/48", nil)
+			url := fmt.Sprintf("%v/schedules/-1/appointments/2", acceptanceUrl)
+			req, _ := http.NewRequest("DELETE", url, nil)
 
 			client := http.Client{}
 
@@ -410,7 +417,7 @@ var _ = Describe("Appointment Routes", func() {
 		})
 
 		It("Should return a not found for a not found scheduleID", func() {
-			url := fmt.Sprintf("http://localhost:8080/schedules/%v/appointments/-1", scheduleID)
+			url := fmt.Sprintf("%v/schedules/%v/appointments/-1", acceptanceUrl, scheduleID)
 			req, _ := http.NewRequest("DELETE", url, nil)
 
 			client := http.Client{}

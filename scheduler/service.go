@@ -3,6 +3,7 @@ package scheduler
 import (
 	"log"
 	"net/http"
+	"sort"
 
 	"github.com/ckaminer/go-utils/http_helpers"
 )
@@ -12,7 +13,10 @@ func createAppointment(a Appointment, scheduleID int) (Appointment, error) {
 	s, found := ScheduleCollection[scheduleID]
 	if !found {
 		log.Println("ScheduleDetailsService - no schedule found for ID: ", scheduleID)
-		return a, http_helpers.NotFoundError{EntityType: "Schedule"}
+		return a, http_helpers.HttpError{
+			StatusCode: http.StatusNotFound,
+			Message:    "Schedule not found",
+		}
 	}
 
 	validAppt := ValidateAppointmentInput(s, a)
@@ -45,4 +49,19 @@ func ValidateAppointmentInput(s Schedule, a Appointment) bool {
 	}
 
 	return true
+}
+
+func sortAppointments(s Schedule) (appointments []Appointment) {
+	if len(s.Appointments) == 0 {
+		appointments = []Appointment{}
+	}
+	for _, appt := range s.Appointments {
+		appointments = append(appointments, appt)
+	}
+
+	sort.SliceStable(appointments, func(i, j int) bool {
+		return appointments[i].StartTime < appointments[j].StartTime
+	})
+
+	return
 }

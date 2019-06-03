@@ -10,5 +10,9 @@ import (
 func StartServer() {
 	r := router.InitializeRouter()
 
-	http.ListenAndServe(":"+os.Getenv("PORT"), r)
+	port := "8080"
+	if os.Getenv("PORT") != "" {
+		port = os.Getenv("PORT")
+	}
+	http.ListenAndServe(":"+port, r)
 }

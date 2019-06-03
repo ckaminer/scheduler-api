@@ -21,10 +21,11 @@ var _ = Describe("Handlers", func() {
 				recorder := httptest.NewRecorder()
 				handler := http.HandlerFunc(CreateScheduleHandler)
 
-				s := Schedule{
-					OwnerName: "Tyrion Lannister",
-				}
-				reqBody, _ := json.Marshal(s)
+				reqBody := []byte(`
+					{
+						"owner_name": "Tyrion Lannister"
+					}
+				`)
 
 				r, _ := http.NewRequest("POST", "/schedules", bytes.NewReader(reqBody))
 
@@ -32,14 +33,15 @@ var _ = Describe("Handlers", func() {
 
 				Expect(recorder.Code).To(Equal(http.StatusCreated))
 
-				var resBody Schedule
+				var resBody ScheduleResponse
 				err := json.NewDecoder(recorder.Body).Decode(&resBody)
 				if err != nil {
 					Fail("Unable to decode response body")
 				}
 
-				Expect(resBody.OwnerName).To(Equal(s.OwnerName))
+				Expect(resBody.OwnerName).To(Equal("Tyrion Lannister"))
 				Expect(resBody.ID).To(Equal(1))
+				Expect(resBody.Appointments).To(Equal([]Appointment{}))
 			})
 
 			It("Should increment the ID by one for each created schedule", func() {
@@ -47,10 +49,11 @@ var _ = Describe("Handlers", func() {
 				recorder := httptest.NewRecorder()
 				handler := http.HandlerFunc(CreateScheduleHandler)
 
-				s := Schedule{
-					OwnerName: "Tyrion Lannister",
-				}
-				reqBody, _ := json.Marshal(s)
+				reqBody := []byte(`
+					{
+						"owner_name": "Tyrion Lannister"
+					}
+				`)
 
 				r, _ := http.NewRequest("POST", "/schedules", bytes.NewReader(reqBody))
 
@@ -58,13 +61,13 @@ var _ = Describe("Handlers", func() {
 
 				Expect(recorder.Code).To(Equal(http.StatusCreated))
 
-				var resBody Schedule
+				var resBody ScheduleResponse
 				err := json.NewDecoder(recorder.Body).Decode(&resBody)
 				if err != nil {
 					Fail("Unable to decode response body")
 				}
 
-				Expect(resBody.OwnerName).To(Equal(s.OwnerName))
+				Expect(resBody.OwnerName).To(Equal("Tyrion Lannister"))
 				Expect(resBody.ID).To(Equal(5))
 
 				Expect(SchedulesCreatedCount).To(Equal(5))
@@ -105,13 +108,15 @@ var _ = Describe("Handlers", func() {
 
 				Expect(recorder.Code).To(Equal(http.StatusOK))
 
-				var resBody Schedule
+				var resBody ScheduleResponse
 				err := json.NewDecoder(recorder.Body).Decode(&resBody)
 				if err != nil {
 					Fail("Unable to decode response body")
 				}
 
-				Expect(resBody).To(Equal(s))
+				Expect(resBody.ID).To(Equal(s.ID))
+				Expect(resBody.OwnerName).To(Equal(s.OwnerName))
+				Expect(resBody.Appointments).To(Equal([]Appointment{}))
 			})
 
 			It("Should return a StatusBadRequest for a non-numerical schedule ID", func() {
@@ -172,13 +177,15 @@ var _ = Describe("Handlers", func() {
 
 				Expect(recorder.Code).To(Equal(http.StatusOK))
 
-				var resBody Schedule
+				var resBody ScheduleResponse
 				err := json.NewDecoder(recorder.Body).Decode(&resBody)
 				if err != nil {
 					Fail("Unable to decode response body")
 				}
 
-				Expect(resBody).To(Equal(s))
+				Expect(resBody.ID).To(Equal(s.ID))
+				Expect(resBody.OwnerName).To(Equal(s.OwnerName))
+				Expect(resBody.Appointments).To(Equal([]Appointment{}))
 
 				if _, found := ScheduleCollection[s.ID]; found {
 					Fail("Schedule should be deleted from storage")
