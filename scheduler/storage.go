@@ -1,9 +1,9 @@
 package scheduler
 
 type Schedule struct {
-	ID           int           `json:"id"`
-	OwnerName    string        `json:"owner_name"`
-	Appointments []Appointment `json:"appointments"`
+	ID           int                 `json:"id"`
+	OwnerName    string              `json:"owner_name"`
+	Appointments map[int]Appointment `json:"appointments"`
 }
 
 type Appointment struct {
@@ -15,3 +15,5 @@ type Appointment struct {
 
 var SchedulesCreatedCount int
 var ScheduleCollection = make(map[int]Schedule)
+
+var AppointmentsCreatedCount int

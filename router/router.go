@@ -16,13 +16,15 @@ func InitializeRouter() *chi.Mux {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	schedulerHandler := scheduler.SchedulerHandler{}
+	schedulerHandler := scheduler.SchedulerHandler{
+		Service: scheduler.SchedulerService{},
+	}
 	r.Post("/schedules", schedulerHandler.CreateSchedule)
 	r.Get("/schedules/{scheduleID}", schedulerHandler.ScheduleDetails)
 	r.Delete("/schedules/{scheduleID}", schedulerHandler.DeleteSchedule)
 
-	// r.Post("/schedules/{scheduleID}/appointments", schedule.CreateAppointmentHandler)
-	// r.Get("/schedules/{scheduleID}/appointments/{appointmentID}", schedule.AppointmentDetailsHandler)
-	// r.Delete("/schedules/{scheduleID}/appointments/{appointmentID}", schedule.DeleteAppointmentHandler)
+	r.Post("/schedules/{scheduleID}/appointments", schedulerHandler.CreateAppointment)
+	r.Get("/schedules/{scheduleID}/appointments/{appointmentID}", schedulerHandler.AppointmentDetails)
+	r.Delete("/schedules/{scheduleID}/appointments/{appointmentID}", schedulerHandler.DeleteAppointment)
 	return r
 }
