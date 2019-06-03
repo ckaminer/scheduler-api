@@ -1,4 +1,4 @@
-# Schedule API
+# Scheduler API
 
 Schedule REST API used to manage schedules and appointments.
 
@@ -49,12 +49,12 @@ git clone https://github.com/ckaminer/scheduler-api.git
 
 Build Docker Image Locally (from the project root):
 ```
-docker build -t schedule-api .
+docker build -t scheduler-api .
 ```
 
 Run Container:
 ```
-docker run -p 8080:8080 -it schedule-api
+docker run -p 8080:8080 -it scheduler-api
 ```
 
 ## Running the tests
