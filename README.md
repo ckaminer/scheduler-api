@@ -13,7 +13,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Installing/Running
 
-A step by step series of examples that tell you how to get a development env running
+#### No Container
 
 Clone repository:
 ```
@@ -39,6 +39,22 @@ Alternatively:
 ```
 go build
 ./schedule-api
+```
+
+#### Using Docker
+Clone repository:
+```
+git clone https://github.com/ckaminer/scheduler-api.git
+```
+
+Build Docker Image Locally (from the project root):
+```
+docker build -t schedule-api .
+```
+
+Run Container:
+```
+docker run -p 8080:8080 -it schedule-api
 ```
 
 ## Running the tests
