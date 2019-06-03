@@ -38,7 +38,7 @@ go run main.go
 Alternatively:
 ```
 go build
-./schedule-api
+./scheduler-api
 ```
 
 #### Using Docker
