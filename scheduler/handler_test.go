@@ -19,8 +19,7 @@ var _ = Describe("Handlers", func() {
 		Context("#CreateSchedule", func() {
 			It("Should return a StatusCreated and the created entity upon successful creation of a schedule", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.CreateSchedule)
+				handler := http.HandlerFunc(CreateScheduleHandler)
 
 				s := Schedule{
 					OwnerName: "Tyrion Lannister",
@@ -46,8 +45,7 @@ var _ = Describe("Handlers", func() {
 			It("Should increment the ID by one for each created schedule", func() {
 				SchedulesCreatedCount = 4
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.CreateSchedule)
+				handler := http.HandlerFunc(CreateScheduleHandler)
 
 				s := Schedule{
 					OwnerName: "Tyrion Lannister",
@@ -74,8 +72,7 @@ var _ = Describe("Handlers", func() {
 
 			It("Should return a StatusBadRequest if the reqBody is invalid", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.CreateSchedule)
+				handler := http.HandlerFunc(CreateScheduleHandler)
 
 				reqBody := []byte(`{"owner_name": true}`)
 
@@ -90,8 +87,7 @@ var _ = Describe("Handlers", func() {
 		Context("#ScheduleDetails", func() {
 			It("Should return schedule details for the given scheduleID", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.ScheduleDetails)
+				handler := http.HandlerFunc(ScheduleDetailsHandler)
 
 				s := Schedule{
 					ID:        31,
@@ -120,8 +116,7 @@ var _ = Describe("Handlers", func() {
 
 			It("Should return a StatusBadRequest for a non-numerical schedule ID", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.ScheduleDetails)
+				handler := http.HandlerFunc(ScheduleDetailsHandler)
 
 				r, _ := http.NewRequest("GET", "/schedules/blamo", nil)
 
@@ -136,8 +131,7 @@ var _ = Describe("Handlers", func() {
 
 			It("Should return a StatusNotFound for a scheduleID that does not have an associated schedule", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.ScheduleDetails)
+				handler := http.HandlerFunc(ScheduleDetailsHandler)
 
 				s := Schedule{
 					ID:        31,
@@ -160,8 +154,7 @@ var _ = Describe("Handlers", func() {
 		Context("#DeleteSchedule", func() {
 			It("Should return a 200 and the deleted entity upon success", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.DeleteSchedule)
+				handler := http.HandlerFunc(DeleteScheduleHandler)
 
 				s := Schedule{
 					ID:        31,
@@ -194,8 +187,7 @@ var _ = Describe("Handlers", func() {
 
 			It("Should return a StatusBadRequest for a non-numerical schedule ID", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.DeleteSchedule)
+				handler := http.HandlerFunc(DeleteScheduleHandler)
 
 				r, _ := http.NewRequest("DELETE", "/schedules/blamo", nil)
 
@@ -210,8 +202,7 @@ var _ = Describe("Handlers", func() {
 
 			It("Should return a StatusNotFound for a scheduleID that does not have an associated schedule", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.DeleteSchedule)
+				handler := http.HandlerFunc(DeleteScheduleHandler)
 
 				s := Schedule{
 					ID:        31,
@@ -236,10 +227,7 @@ var _ = Describe("Handlers", func() {
 		Context("#CreateAppointment", func() {
 			It("Should return a StatusCreated and the created entity upon successful creation of a appointment", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{
-					Service: SchedulerService{},
-				}
-				handler := http.HandlerFunc(wrapper.CreateAppointment)
+				handler := http.HandlerFunc(CreateAppointmentHandler)
 
 				s := Schedule{
 					ID:           12,
@@ -282,10 +270,7 @@ var _ = Describe("Handlers", func() {
 			It("Should increment the ID by one for each created appointment", func() {
 				AppointmentsCreatedCount = 7
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{
-					Service: SchedulerService{},
-				}
-				handler := http.HandlerFunc(wrapper.CreateAppointment)
+				handler := http.HandlerFunc(CreateAppointmentHandler)
 
 				s := Schedule{
 					ID:           12,
@@ -325,8 +310,7 @@ var _ = Describe("Handlers", func() {
 
 			It("Should return a StatusBadRequest for a non-numerical schedule ID", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.CreateAppointment)
+				handler := http.HandlerFunc(CreateAppointmentHandler)
 
 				r, _ := http.NewRequest("POST", "/schedules/blamo/appointments", nil)
 
@@ -341,8 +325,7 @@ var _ = Describe("Handlers", func() {
 
 			It("Should return a StatusBadRequest if the reqBody is invalid", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.CreateAppointment)
+				handler := http.HandlerFunc(CreateAppointmentHandler)
 
 				reqBody := []byte(`{"start_time": true}`)
 
@@ -358,8 +341,7 @@ var _ = Describe("Handlers", func() {
 
 			It("Should return a StatusNotFound for a scheduleID that does not have an associated schedule", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.CreateAppointment)
+				handler := http.HandlerFunc(CreateAppointmentHandler)
 
 				a := Appointment{
 					StartTime: 5,
@@ -377,13 +359,45 @@ var _ = Describe("Handlers", func() {
 
 				Expect(recorder.Code).To(Equal(http.StatusNotFound))
 			})
+
+			It("Should return a StatusUnprocessableEntity for invalid appointment times", func() {
+				recorder := httptest.NewRecorder()
+				handler := http.HandlerFunc(CreateAppointmentHandler)
+
+				scheduledAppts := map[int]Appointment{
+					5: Appointment{
+						StartTime: 7,
+						EndTime:   15,
+					},
+				}
+				s := Schedule{
+					ID:           12,
+					OwnerName:    "Tyrion Lannister",
+					Appointments: scheduledAppts,
+				}
+				ScheduleCollection[s.ID] = s
+
+				a := Appointment{
+					StartTime: 5,
+					EndTime:   9,
+				}
+				reqBody, _ := json.Marshal(a)
+
+				r, _ := http.NewRequest("POST", "/schedules/12/appointments", bytes.NewReader(reqBody))
+				rctx := chi.NewRouteContext()
+				rctx.URLParams.Add("scheduleID", "12")
+				r = r.WithContext(context.WithValue(r.Context(), chi.RouteCtxKey, rctx))
+
+				handler.ServeHTTP(recorder, r)
+
+				Expect(recorder.Code).To(Equal(http.StatusUnprocessableEntity))
+			})
 		})
 
 		Context("#AppointmentDetails", func() {
 			It("Should return appointment details for the given appointmentID", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.AppointmentDetails)
+				handler := http.HandlerFunc(AppointmentDetailsHandler)
 
 				a := Appointment{
 					ID:         12,
@@ -422,8 +436,7 @@ var _ = Describe("Handlers", func() {
 
 			It("Should return a StatusBadRequest for a non-numerical schedule ID", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.AppointmentDetails)
+				handler := http.HandlerFunc(AppointmentDetailsHandler)
 
 				r, _ := http.NewRequest("GET", "schedules/blamo/appointments/12", nil)
 
@@ -439,8 +452,7 @@ var _ = Describe("Handlers", func() {
 
 			It("Should return a StatusBadRequest for a non-numerical appointment ID", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.AppointmentDetails)
+				handler := http.HandlerFunc(AppointmentDetailsHandler)
 
 				r, _ := http.NewRequest("GET", "schedules/13/appointments/blamo", nil)
 
@@ -456,8 +468,7 @@ var _ = Describe("Handlers", func() {
 
 			It("Should return a StatusNotFound if the schedule is not found", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.AppointmentDetails)
+				handler := http.HandlerFunc(AppointmentDetailsHandler)
 
 				r, _ := http.NewRequest("GET", "/schedule/12/appointments/13", nil)
 
@@ -473,8 +484,7 @@ var _ = Describe("Handlers", func() {
 
 			It("Should return a StatusNotFound if the appointment is not found on the provided schedule", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.AppointmentDetails)
+				handler := http.HandlerFunc(AppointmentDetailsHandler)
 
 				a := Appointment{
 					ID:         12,
@@ -507,8 +517,7 @@ var _ = Describe("Handlers", func() {
 		Context("#DeleteAppointment", func() {
 			It("Should return a 200 and the deleted entity upon success", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.DeleteAppointment)
+				handler := http.HandlerFunc(DeleteAppointmentHandler)
 
 				a := Appointment{
 					ID:         12,
@@ -554,8 +563,7 @@ var _ = Describe("Handlers", func() {
 
 			It("Should return a StatusBadRequest for a non-numerical schedule ID", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.DeleteAppointment)
+				handler := http.HandlerFunc(DeleteAppointmentHandler)
 
 				r, _ := http.NewRequest("DELETE", "schedules/blamo/appointments/12", nil)
 
@@ -571,8 +579,7 @@ var _ = Describe("Handlers", func() {
 
 			It("Should return a StatusBadRequest for a non-numerical appointment ID", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.DeleteAppointment)
+				handler := http.HandlerFunc(DeleteAppointmentHandler)
 
 				r, _ := http.NewRequest("DELETE", "schedules/13/appointments/blamo", nil)
 
@@ -588,8 +595,7 @@ var _ = Describe("Handlers", func() {
 
 			It("Should return a StatusNotFound if the schedule is not found", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.DeleteAppointment)
+				handler := http.HandlerFunc(DeleteAppointmentHandler)
 
 				r, _ := http.NewRequest("DELETE", "/schedule/12/appointments/13", nil)
 
@@ -605,8 +611,7 @@ var _ = Describe("Handlers", func() {
 
 			It("Should return a StatusNotFound if the appointment is not found on the provided schedule", func() {
 				recorder := httptest.NewRecorder()
-				wrapper := SchedulerHandler{}
-				handler := http.HandlerFunc(wrapper.DeleteAppointment)
+				handler := http.HandlerFunc(DeleteAppointmentHandler)
 
 				a := Appointment{
 					ID:         12,

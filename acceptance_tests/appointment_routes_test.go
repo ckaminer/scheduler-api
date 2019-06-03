@@ -76,7 +76,15 @@ var _ = Describe("Appointment Routes", func() {
 			Expect(a.EndTime).To(Equal(9))
 
 			// Send additional request to confirm ID is being incremented
-			res, err = client.Do(req)
+			reqBody = []byte(`
+				{
+					"start_time": 10,
+					"end_time": 11
+				}
+			`)
+
+			newReq, _ := http.NewRequest("POST", url, bytes.NewReader(reqBody))
+			res, err = client.Do(newReq)
 			if err != nil {
 				Fail("Failed to send request")
 			}
@@ -130,6 +138,87 @@ var _ = Describe("Appointment Routes", func() {
 			}
 
 			Expect(res.StatusCode).To(Equal(http.StatusBadRequest))
+		})
+
+		Context("Should return a unprocessable entity if a time validation fails", func() {
+			It("start time greater than end time", func() {
+				reqBody := []byte(`
+					{
+						"start_time": 5,
+						"end_time": 3
+					}
+				`)
+
+				url := fmt.Sprintf("http://localhost:8080/schedules/%v/appointments", scheduleID)
+				req, _ := http.NewRequest("POST", url, bytes.NewReader(reqBody))
+
+				client := http.Client{}
+
+				res, err := client.Do(req)
+				if err != nil {
+					Fail("Failed to send request")
+				}
+
+				Expect(res.StatusCode).To(Equal(http.StatusUnprocessableEntity))
+			})
+
+			It("start time is zero", func() {
+				reqBody := []byte(`
+					{
+						"start_time": 0,
+						"end_time": 3
+					}
+				`)
+
+				url := fmt.Sprintf("http://localhost:8080/schedules/%v/appointments", scheduleID)
+				req, _ := http.NewRequest("POST", url, bytes.NewReader(reqBody))
+
+				client := http.Client{}
+
+				res, err := client.Do(req)
+				if err != nil {
+					Fail("Failed to send request")
+				}
+
+				Expect(res.StatusCode).To(Equal(http.StatusUnprocessableEntity))
+			})
+
+			It("range overlaps existing appointment", func() {
+				reqBody := []byte(`
+					{
+						"start_time": 1,
+						"end_time": 4
+					}
+				`)
+
+				url := fmt.Sprintf("http://localhost:8080/schedules/%v/appointments", scheduleID)
+				req, _ := http.NewRequest("POST", url, bytes.NewReader(reqBody))
+
+				client := http.Client{}
+
+				res, err := client.Do(req)
+				if err != nil {
+					Fail("Failed to send request")
+				}
+
+				Expect(res.StatusCode).To(Equal(http.StatusCreated))
+
+				reqBody = []byte(`
+					{
+						"start_time": 3,
+						"end_time": 6
+					}
+				`)
+
+				req, _ = http.NewRequest("POST", url, bytes.NewReader(reqBody))
+
+				res, err = client.Do(req)
+				if err != nil {
+					Fail("Failed to send request")
+				}
+
+				Expect(res.StatusCode).To(Equal(http.StatusUnprocessableEntity))
+			})
 		})
 	})
 

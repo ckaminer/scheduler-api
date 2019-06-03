@@ -11,11 +11,7 @@ import (
 	"github.com/go-chi/chi"
 )
 
-type SchedulerHandler struct {
-	Service SchedulerService
-}
-
-func (handler *SchedulerHandler) CreateSchedule(w http.ResponseWriter, r *http.Request) {
+func CreateScheduleHandler(w http.ResponseWriter, r *http.Request) {
 	var s Schedule
 	err := json.NewDecoder(r.Body).Decode(&s)
 	if err != nil {
@@ -33,7 +29,7 @@ func (handler *SchedulerHandler) CreateSchedule(w http.ResponseWriter, r *http.R
 	http_helpers.RespondWithJSON(w, http.StatusCreated, s)
 }
 
-func (handler *SchedulerHandler) ScheduleDetails(w http.ResponseWriter, r *http.Request) {
+func ScheduleDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	scheduleID, err := convertIDParam(r, "scheduleID")
 	if err != nil {
 		http_helpers.RespondWithError(w, http.StatusBadRequest, "Invalid schedule ID")
@@ -51,7 +47,7 @@ func (handler *SchedulerHandler) ScheduleDetails(w http.ResponseWriter, r *http.
 	http_helpers.RespondWithJSON(w, http.StatusOK, s)
 }
 
-func (handler *SchedulerHandler) DeleteSchedule(w http.ResponseWriter, r *http.Request) {
+func DeleteScheduleHandler(w http.ResponseWriter, r *http.Request) {
 	scheduleID, err := convertIDParam(r, "scheduleID")
 	if err != nil {
 		http_helpers.RespondWithError(w, http.StatusBadRequest, "Invalid schedule ID")
@@ -70,7 +66,7 @@ func (handler *SchedulerHandler) DeleteSchedule(w http.ResponseWriter, r *http.R
 	http_helpers.RespondWithJSON(w, http.StatusOK, s)
 }
 
-func (handler *SchedulerHandler) CreateAppointment(w http.ResponseWriter, r *http.Request) {
+func CreateAppointmentHandler(w http.ResponseWriter, r *http.Request) {
 	scheduleID, err := convertIDParam(r, "scheduleID")
 	if err != nil {
 		http_helpers.RespondWithError(w, http.StatusBadRequest, "Invalid schedule ID")
@@ -86,7 +82,7 @@ func (handler *SchedulerHandler) CreateAppointment(w http.ResponseWriter, r *htt
 	}
 	defer r.Body.Close()
 
-	createdAppt, err := handler.Service.CreateAppointment(a, scheduleID)
+	createdAppt, err := createAppointment(a, scheduleID)
 	if err != nil {
 		http_helpers.RespondWithParsedError(w, err)
 		return
@@ -95,7 +91,7 @@ func (handler *SchedulerHandler) CreateAppointment(w http.ResponseWriter, r *htt
 	http_helpers.RespondWithJSON(w, http.StatusCreated, createdAppt)
 }
 
-func (handler *SchedulerHandler) AppointmentDetails(w http.ResponseWriter, r *http.Request) {
+func AppointmentDetailsHandler(w http.ResponseWriter, r *http.Request) {
 	scheduleID, err := convertIDParam(r, "scheduleID")
 	if err != nil {
 		http_helpers.RespondWithError(w, http.StatusBadRequest, "Invalid appointment ID")
@@ -127,7 +123,7 @@ func (handler *SchedulerHandler) AppointmentDetails(w http.ResponseWriter, r *ht
 	http_helpers.RespondWithJSON(w, http.StatusOK, a)
 }
 
-func (handler *SchedulerHandler) DeleteAppointment(w http.ResponseWriter, r *http.Request) {
+func DeleteAppointmentHandler(w http.ResponseWriter, r *http.Request) {
 	scheduleID, err := convertIDParam(r, "scheduleID")
 	if err != nil {
 		http_helpers.RespondWithError(w, http.StatusBadRequest, "Invalid schedule ID")
